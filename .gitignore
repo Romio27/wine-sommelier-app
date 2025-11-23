@@ -1,0 +1,27 @@
+# Environment
+.env
+venv/
+venv_old/
+__pycache__/
+*.pyc
+
+# Streamlit secrets (contains API keys)
+.streamlit/secrets.toml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data files (optional - uncomment if too large)
+# data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
