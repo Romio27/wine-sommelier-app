@@ -81,15 +81,23 @@ def initialize_models():
     """Initialize embeddings and LLM (cached for performance)"""
     AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT = get_secret("EMBEDDING_DEPLOYMENT_NAME")
 
-    # Set OpenAI API key for Streamlit Cloud
+    # Set all API keys for Streamlit Cloud
     openai_key = get_secret("OPENAI_API_KEY")
     if openai_key:
         os.environ["OPENAI_API_KEY"] = openai_key
 
+    azure_key = get_secret("AZURE_OPENAI_API_KEY")
+    if azure_key:
+        os.environ["AZURE_OPENAI_API_KEY"] = azure_key
+
+    azure_endpoint = get_secret("AZURE_OPENAI_ENDPOINT")
+    if azure_endpoint:
+        os.environ["AZURE_OPENAI_ENDPOINT"] = azure_endpoint
+
     embeddings = AzureOpenAIEmbeddings(
         deployment=AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
-        base_url=None,
-        azure_endpoint=get_secret("AZURE_OPENAI_ENDPOINT"),
+        api_key=azure_key,
+        azure_endpoint=azure_endpoint,
     )
 
     llm = ChatOpenAI(model="gpt-4.1", temperature=0.0)
