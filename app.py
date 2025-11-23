@@ -94,8 +94,12 @@ def initialize_models():
     if azure_endpoint:
         os.environ["AZURE_OPENAI_ENDPOINT"] = azure_endpoint
 
+    # Clear conflicting env vars for Azure
+    if "OPENAI_API_BASE" in os.environ:
+        del os.environ["OPENAI_API_BASE"]
+
     embeddings = AzureOpenAIEmbeddings(
-        deployment=AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
+        azure_deployment=AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
         api_key=azure_key,
         azure_endpoint=azure_endpoint,
     )
