@@ -104,7 +104,18 @@ def initialize_models():
         azure_endpoint=azure_endpoint,
     )
 
-    llm = ChatOpenAI(model="gpt-4.1", temperature=0.0)
+    # Configure ChatOpenAI - use OpenRouter if that's the API key type
+    openai_base_url = get_secret("OPENAI_API_BASE")
+    if openai_key and openai_key.startswith("sk-or-"):
+        # OpenRouter key detected
+        llm = ChatOpenAI(
+            model="openai/gpt-4.1",  # OpenRouter model format
+            temperature=0.0,
+            base_url=openai_base_url or "https://openrouter.ai/api/v1",
+            api_key=openai_key,
+        )
+    else:
+        llm = ChatOpenAI(model="gpt-4.1", temperature=0.0)
 
     return embeddings, llm
 
