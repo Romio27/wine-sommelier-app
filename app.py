@@ -558,19 +558,36 @@ def summarizer(state: WineSommelierState) -> dict:
     if len(state.messages) < 3:
         return {}
 
-    recent_messages = state.messages[-6:] if len(state.messages) > 6 else state.messages
+    # Filter messages to only include text content (exclude tool calls/responses)
+    filtered_messages = []
+    for msg in state.messages[-10:]:
+        if isinstance(msg, HumanMessage):
+            filtered_messages.append(HumanMessage(content=msg.content))
+        elif isinstance(msg, AIMessage):
+            # Only include AI messages with actual text content, not tool calls
+            if msg.content and not hasattr(msg, 'tool_calls'):
+                filtered_messages.append(AIMessage(content=msg.content))
+            elif msg.content and hasattr(msg, 'tool_calls') and not msg.tool_calls:
+                filtered_messages.append(AIMessage(content=msg.content))
+
+    if len(filtered_messages) < 2:
+        return {}
 
     summary_prompt = """Summarize this wine consultation conversation in 2-3 sentences:
     - What the user was looking for
     - What recommendations were made
     - Any specific preferences mentioned"""
 
-    response = llm.invoke([
-        SystemMessage(summary_prompt),
-        *recent_messages
-    ])
+    try:
+        response = llm.invoke([
+            SystemMessage(summary_prompt),
+            *filtered_messages[-6:]
+        ])
+        summary = response.content
+    except Exception as e:
+        # Fallback if summarization fails
+        summary = "Wine consultation completed."
 
-    summary = response.content
     return {"conversation_summary": summary}
 
 
