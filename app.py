@@ -231,6 +231,190 @@ def save_favorite(
     return f"Successfully saved '{wine_name}' to your favorites!\nNotes: {notes}"
 
 
+@tool(description="Search online wine stores to find where to buy a specific wine and compare prices")
+def search_wine_stores(
+    wine_name: Annotated[str, "Name of the wine to search for"],
+    country: Annotated[str, "Country for store search (e.g., 'US', 'UA', 'EU')"] = "US"
+) -> str:
+    """Searches online wine retailers for availability and prices"""
+    import random
+
+    # Simulated store data (in production: integrate with Vivino API, Wine.com API)
+    base_price = random.randint(20, 80)
+
+    stores = [
+        {
+            "store": "Vivino",
+            "price": f"${base_price + random.randint(-5, 10):.2f}",
+            "rating": f"{random.uniform(3.8, 4.8):.1f}/5",
+            "availability": "In Stock",
+            "url": "vivino.com"
+        },
+        {
+            "store": "Wine.com",
+            "price": f"${base_price + random.randint(-3, 15):.2f}",
+            "rating": f"{random.uniform(3.5, 4.5):.1f}/5",
+            "availability": "In Stock",
+            "url": "wine.com"
+        },
+        {
+            "store": "Total Wine",
+            "price": f"${base_price + random.randint(-8, 5):.2f}",
+            "rating": "N/A",
+            "availability": "Limited Stock",
+            "url": "totalwine.com"
+        },
+    ]
+
+    # Sort by price
+    stores_sorted = sorted(stores, key=lambda x: float(x['price'].replace('$', '')))
+
+    result = f"🛒 **Where to buy '{wine_name}':**\n\n"
+    for store in stores_sorted:
+        result += f"**{store['store']}** - {store['price']}\n"
+        result += f"   Rating: {store['rating']} | {store['availability']}\n"
+        result += f"   🔗 {store['url']}\n\n"
+
+    best = stores_sorted[0]
+    result += f"💡 **Best price:** {best['store']} at {best['price']}"
+
+    return result
+
+
+@tool(description="Get aggregated reviews and ratings for a wine from multiple sources like Vivino, Wine Spectator")
+def get_wine_reviews(
+    wine_name: Annotated[str, "Name of the wine to get reviews for"],
+    vintage: Annotated[str, "Wine vintage year (optional)"] = "recent"
+) -> str:
+    """Fetches wine reviews from multiple rating sources"""
+    import random
+
+    # Simulated review data (in production: integrate with wine rating APIs)
+    vivino_score = round(random.uniform(3.8, 4.7), 1)
+    ws_score = random.randint(85, 96)
+    ct_score = random.randint(84, 94)
+
+    tasting_notes = [
+        "Smooth tannins with cherry and blackberry notes",
+        "Elegant structure with hints of oak and vanilla",
+        "Rich and full-bodied with dark fruit flavors",
+        "Balanced acidity with a long, pleasant finish",
+        "Complex aromas of spice and ripe fruit"
+    ]
+
+    result = f"⭐ **Reviews for {wine_name}**\n"
+    if vintage != "recent":
+        result += f"Vintage: {vintage}\n"
+    result += "\n"
+
+    result += f"🍷 **Vivino**: {vivino_score}/5 ({random.randint(500, 3000)} reviews)\n"
+    result += f"   _{random.choice(tasting_notes)}_\n\n"
+
+    result += f"📰 **Wine Spectator**: {ws_score}/100\n"
+    result += f"   _{random.choice(tasting_notes)}_\n\n"
+
+    result += f"📊 **CellarTracker**: {ct_score}/100 ({random.randint(30, 200)} reviews)\n"
+    result += f"   _{random.choice(tasting_notes)}_\n\n"
+
+    # Calculate average
+    avg_score = (vivino_score * 20 + ws_score + ct_score) / 3
+    result += f"**Overall Score: {avg_score:.0f}/100** "
+
+    if avg_score >= 90:
+        result += "🏆 Excellent!"
+    elif avg_score >= 85:
+        result += "✨ Very Good"
+    else:
+        result += "👍 Good"
+
+    return result
+
+
+@tool(description="Suggest food recipes that pair perfectly with a specific wine type")
+def suggest_recipes(
+    wine_type: Annotated[str, "Type of wine (e.g., 'Cabernet Sauvignon', 'Chardonnay', 'Pinot Noir')"],
+    cuisine: Annotated[str, "Preferred cuisine type (e.g., 'Italian', 'French', 'any')"] = "any",
+    difficulty: Annotated[str, "Recipe difficulty: easy, medium, hard"] = "any"
+) -> str:
+    """Suggests recipes that pair well with the specified wine"""
+
+    # Comprehensive pairing database
+    pairings = {
+        "cabernet sauvignon": [
+            {"name": "Grilled Ribeye Steak", "time": "25 min", "difficulty": "easy", "cuisine": "American"},
+            {"name": "Braised Short Ribs", "time": "3 hours", "difficulty": "medium", "cuisine": "French"},
+            {"name": "Lamb Chops with Rosemary", "time": "30 min", "difficulty": "easy", "cuisine": "Mediterranean"},
+            {"name": "Beef Bourguignon", "time": "2.5 hours", "difficulty": "medium", "cuisine": "French"},
+        ],
+        "pinot noir": [
+            {"name": "Roasted Duck Breast", "time": "40 min", "difficulty": "medium", "cuisine": "French"},
+            {"name": "Salmon with Herb Crust", "time": "25 min", "difficulty": "easy", "cuisine": "any"},
+            {"name": "Mushroom Risotto", "time": "45 min", "difficulty": "medium", "cuisine": "Italian"},
+            {"name": "Coq au Vin", "time": "2 hours", "difficulty": "medium", "cuisine": "French"},
+        ],
+        "chardonnay": [
+            {"name": "Lobster with Butter Sauce", "time": "30 min", "difficulty": "medium", "cuisine": "French"},
+            {"name": "Creamy Chicken Alfredo", "time": "35 min", "difficulty": "easy", "cuisine": "Italian"},
+            {"name": "Baked Brie with Honey & Nuts", "time": "15 min", "difficulty": "easy", "cuisine": "French"},
+            {"name": "Shrimp Scampi", "time": "20 min", "difficulty": "easy", "cuisine": "Italian"},
+        ],
+        "sauvignon blanc": [
+            {"name": "Goat Cheese Salad", "time": "15 min", "difficulty": "easy", "cuisine": "French"},
+            {"name": "Grilled Sea Bass", "time": "20 min", "difficulty": "easy", "cuisine": "Mediterranean"},
+            {"name": "Asparagus Quiche", "time": "50 min", "difficulty": "medium", "cuisine": "French"},
+            {"name": "Ceviche", "time": "30 min", "difficulty": "easy", "cuisine": "Latin"},
+        ],
+        "merlot": [
+            {"name": "Roasted Pork Tenderloin", "time": "45 min", "difficulty": "easy", "cuisine": "any"},
+            {"name": "Pasta Bolognese", "time": "1.5 hours", "difficulty": "medium", "cuisine": "Italian"},
+            {"name": "Stuffed Bell Peppers", "time": "1 hour", "difficulty": "easy", "cuisine": "Mediterranean"},
+            {"name": "Beef Tacos", "time": "30 min", "difficulty": "easy", "cuisine": "Mexican"},
+        ],
+        "riesling": [
+            {"name": "Thai Green Curry", "time": "35 min", "difficulty": "medium", "cuisine": "Thai"},
+            {"name": "Pork Schnitzel", "time": "25 min", "difficulty": "easy", "cuisine": "German"},
+            {"name": "Spicy Shrimp Stir-Fry", "time": "20 min", "difficulty": "easy", "cuisine": "Asian"},
+            {"name": "Apple Tart", "time": "1 hour", "difficulty": "medium", "cuisine": "French"},
+        ],
+    }
+
+    # Find matching wine type
+    wine_key = wine_type.lower()
+    recipes = None
+    for key in pairings:
+        if key in wine_key or wine_key in key:
+            recipes = pairings[key]
+            break
+
+    if not recipes:
+        # Default to cabernet pairings for red, chardonnay for white
+        if any(word in wine_key for word in ["red", "noir", "merlot", "shiraz", "syrah"]):
+            recipes = pairings["cabernet sauvignon"]
+        else:
+            recipes = pairings["chardonnay"]
+
+    # Filter by cuisine and difficulty if specified
+    if cuisine != "any":
+        filtered = [r for r in recipes if cuisine.lower() in r['cuisine'].lower() or r['cuisine'] == "any"]
+        if filtered:
+            recipes = filtered
+
+    if difficulty != "any":
+        filtered = [r for r in recipes if r['difficulty'] == difficulty.lower()]
+        if filtered:
+            recipes = filtered
+
+    result = f"🍳 **Recipes for {wine_type}**\n\n"
+
+    for i, recipe in enumerate(recipes[:4], 1):
+        result += f"{i}. **{recipe['name']}**\n"
+        result += f"   ⏱️ {recipe['time']} | 📊 {recipe['difficulty'].capitalize()} | 🌍 {recipe['cuisine']}\n\n"
+
+    result += "💡 _These recipes are selected to complement the wine's flavor profile_"
+
+    return result
+
+
 # Define Custom State
 class WineSommelierState(BaseModel):
     """Custom state for Wine Sommelier workflow"""
@@ -415,7 +599,7 @@ def route_after_evaluation(state: WineSommelierState) -> Literal["optimizer", "a
 @st.cache_resource
 def build_wine_sommelier_graph():
     """Builds the complete Wine Sommelier workflow"""
-    tools = [wine_search, get_weather, pairing_score, save_favorite]
+    tools = [wine_search, get_weather, pairing_score, save_favorite, search_wine_stores, get_wine_reviews, suggest_recipes]
     tool_node = ToolNode(tools)
 
     agent = create_react_agent(
